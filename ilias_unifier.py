@@ -121,7 +121,7 @@ class Mat2Name:
         #Gibt die angegebene Matrikelnummer als Benutzername zurück
         if not self.prepared:
             self.finish_df()
-        return self.lookup.loc[mat]["Benutzername"]
+        return self.lookup.loc[mat]["Name"]
 
     def finish_df(self):
         # Sorgt dafür, dass die Matrikelnummer suchbar wird
@@ -141,7 +141,7 @@ def summarize_tests():
         tqdm.write(f"Analysing: {file}")
 
         df = pd.read_excel(dir + file).fillna(method="ffill")
-        mat_handler.append(df[["Matrikelnummer", "Benutzername"]].drop_duplicates().set_index("Matrikelnummer"))
+        mat_handler.append(df[["Matrikelnummer", "Name"]].drop_duplicates().set_index("Matrikelnummer"))
 
         # Die folgenden Zeilen löschen alle nicht bewerteten Durchläufe aus dem DataFrame
         unique = df.groupby("Benutzername").apply(lambda x: x[x["Durchlauf"] == x["Bewerteter Durchlauf"]])
@@ -157,7 +157,9 @@ def summarize_tests():
 
     #Hier werden die Namen wieder den Matrikelnummern zugeordnet
     names = [mat_handler.lookup_name(mat) for mat in ov.index]
-    ov.insert(0, "Benutzername", names)
+    sums = ov.sum(axis=1)
+    ov.insert(0, "Summen", sums)
+    ov.insert(0, "Name", names)
     ov.to_excel("Ausgabe.xlsx")
 
 if __name__=="__main__":
